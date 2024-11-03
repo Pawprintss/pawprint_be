@@ -1,0 +1,81 @@
+buildscript {
+	ext {
+		restdocsApiSpecVersion = '0.18.2'
+	}
+}
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.5'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id 'com.epages.restdocs-api-spec' version "${restdocsApiSpecVersion}"
+}
+
+group = 'com.recorders'
+version = '0.0.1-SNAPSHOT'
+
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+
+
+repositories {
+	mavenCentral()
+}
+
+
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	testImplementation "com.epages:restdocs-api-spec-mockmvc:${restdocsApiSpecVersion}"
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+
+
+bootJar{
+	dependsOn('openapi3')
+}
+
+
+openapi3 {
+	servers=[
+			{
+				url="http://ec2-3-13-244-171.us-east-2.compute.amazonaws.com:80"
+				description="Production Server"
+			},
+			{
+				url="http://localhost:8080"
+				description="Local Server"
+			}
+	]
+	title = "restdocs-swagger Test API Documentation"
+	description = "Spring REST Docs with SwaggerUI"
+	version = "0.0.1-SNAPSHOT"
+	format = "yaml"
+	outputDirectory=file("build/resources/main/static/docs")
+}
+
+
+
